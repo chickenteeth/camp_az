@@ -59,6 +59,8 @@ app.get("/", function(req, res){
     res.render("landing");
 });
 
-app.listen(3000, () => {
-	console.log("Server Listening");
-});
+app.listen(process.env.PORT, process.env.IP);
+
+// app.listen(3000, () => {
+// 	console.log("Server Listening");
+// });
