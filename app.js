@@ -16,7 +16,7 @@ var commentRoutes    = require("./routes/comments"),
     campgroundRoutes = require("./routes/campgrounds"),
     indexRoutes      = require("./routes/index");
 
-mongoose.connect('mongodb+srv://admin:Spankaroo5@cluster0-sqqwl.mongodb.net/test2?retryWrites=true', {
+mongoose.connect(process.env.DATABASEURL, {
 	useNewUrlParser: true,
 	useCreateIndex: true
 }).then(() => {
