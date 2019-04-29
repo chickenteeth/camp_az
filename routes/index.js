@@ -18,7 +18,16 @@ router.get("/login", function(req, res){
 
 //Sign Up Logic
 router.post("/register", function(req, res){
-    var newUser = new User({username: req.body.username});
+    var newUser = new User({
+		username: req.body.username,
+		firstName: req.body.firstName,
+		lastName: req.body.lasttName,
+		email: req.body.email,
+		avatar: req.body.avatar
+		});
+    if(req.body.adminCode === 'tacos') {
+      newUser.isAdmin = true;
+    }
     User.register(newUser, req.body.password, function(err, user){
         if(err){
             return res.render("register", {"error": err.message});
@@ -49,5 +58,17 @@ router.get("/logout", (req, res) => {
 	req.flash("success", "You have logged out");
 	res.redirect("/campgrounds");
 });
+
+//User Profiles
+router.get("/users/:id", function(req,res){
+	User.findById(req.params.id, function(err, foundUser){
+		if (err){
+			req.flash("error", "Something went wrong");
+			res.redirect("/");
+		}
+		res.render("users/show", {user: foundUser});
+	});
+});
+
 
 module.exports = router;
