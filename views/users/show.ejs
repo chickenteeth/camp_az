@@ -2,11 +2,21 @@
 
 <div class="row">
 	<div class="col-md-4">
-		<h1><%= user.username %></h1>
-		<h4><%= user.firstName + " " + user.lastName %></h4>
-		<img src="<%= user.avatar %>" alt="User Profile Image">
+		<div class="thumbnail">
+			<h2><%= user.firstName + " " + user.lastName %></h2>
+			<img src="<%= user.avatar %>" alt="User Profile Image">
+			<div class="caption"><a href="mailto:<%= user.email %>"></a></div>
+		</div>
+		Bacon ipsum dolor amet pork loin bacon jowl turkey, fatback beef salami tail pork frankfurter meatloaf prosciutto drumstick chicken rump. Meatloaf andouille pork chop shoulder. Flank venison spare ribs, bresaola fatback chicken pig ribeye tongue tail shank chuck filet mignon burgdoggen short loin. Jerky fatback t-bone porchetta. Salami strip steak jowl prosciutto pork cupim sausage. Turducken jowl tail turkey short loin. Short loin prosciutto biltong cupim.
 	</div>
-	<div class="col-md-8"></div>
+	<div class="col-md-8">
+		<h3><%= user.username %>'s Campgrounds</h3>
+		<ul>
+			<% campgrounds.forEach(function(campground){ %>
+			<li><a href="/campgrounds/<%= campground.id %>"><%= campground.name %></a></li>
+		</ul>
+		<% }) %>
+	</div>
 </div>
 
 <% include ../partials/footer %>
