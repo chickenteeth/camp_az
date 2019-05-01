@@ -7,6 +7,10 @@
             <p >
 				<a class="btn btn-primary btn-lg" href="/campgrounds/new">Add New Campground</a>
 			</p>
+			
+            <% if(noMatch !== null) { %>
+			<h3><%= noMatch %></h3>
+			<% } %>
 			<p>
 				<form action="/campgrounds" method="GET" class="form-inline">
 					<div class="form-group">
@@ -14,8 +18,9 @@
 						<input type="submit" value="search" class="btn btn-default">
 						<a href="/campgrounds"><input type="button" value="reset" class="btn btn-default"></a>
 					</div>
-			</form>
+				</form>
 			</p>
+
         </div>
     </header>
     
