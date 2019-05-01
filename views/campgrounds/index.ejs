@@ -5,7 +5,17 @@
             <h1><i class="fas fa-campground"></i> Welcome to YelpCamp!</h1>
             <p>View our handpicked campgrounds from all over the world</p>
             <p >
-            <a class="btn btn-primary btn-lg" href="/campgrounds/new">Add New Campground</a></p>
+				<a class="btn btn-primary btn-lg" href="/campgrounds/new">Add New Campground</a>
+			</p>
+			<p>
+				<form action="/campgrounds" method="GET" class="form-inline">
+					<div class="form-group">
+						<input type="text" name="search" placeholder="Campground Search" class="form-control">
+						<input type="submit" value="search" class="btn btn-default">
+						<a href="/campgrounds"><input type="button" value="reset" class="btn btn-default"></a>
+					</div>
+			</form>
+			</p>
         </div>
     </header>
     
