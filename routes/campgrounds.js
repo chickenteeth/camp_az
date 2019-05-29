@@ -3,6 +3,27 @@ var router = express.Router();
 var Campground = require("../models/campground");
 var Comment = require("../models/comment");
 var middleware = require("../middleware");
+var multer = require('multer');
+var storage = multer.diskStorage({
+  filename: function(req, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  }
+});
+var imageFilter = function (req, file, cb) {
+    // accept image files only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+};
+var upload = multer({ storage: storage, fileFilter: imageFilter});
+
+var cloudinary = require('cloudinary');
+cloudinary.config({ 
+  cloud_name: 'di12tfvna', 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 //INDEX - show all campgrounds
 router.get("/", function(req, res){
@@ -33,26 +54,33 @@ router.get("/", function(req, res){
 });
 
 //CREATE - add new campground to DB
-router.post("/", middleware.isLoggedIn,function(req, res){
-    // get data from form and add to campgrounds array
-    var name = req.body.name;
-	var price = req.body.price;
-    var image = req.body.image;
-    var desc = req.body.description;
-	var author = {
+router.post("/", middleware.isLoggedIn, upload.single('image'), function(req, res) {
+	cloudinary.v2.uploader.upload(req.file.path, function(err, result) {
+		if(err) {
+		req.flash('error', err.message);
+		return res.redirect('back');
+		}
+		// add cloudinary url for the image to the campground object under image property
+		req.body.campground.image = result.secure_url;
+		// add image's public_id to campground object
+		req.body.campground.imageId = result.public_id;
+		// add price to campground
+		req.body.price = req.body.price;
+		// add author to campground
+		req.body.campground.author = {
 		id: req.user._id,
 		username: req.user.username
-	};
-    var newCampground = {name: name, image: image, description: desc, author: author};
-    // Create a new campground and save to DB
-    Campground.create(newCampground, function(err, newlyCreated){
-        if(err){
-            console.log(err);
-        } else {
-            //redirect back to campgrounds page
-			console.log(newlyCreated);
-            res.redirect("/campgrounds");
+		};
+		// add description to campground
+		req.body.campground.desc = req.body.description;
+		
+      Campground.create(req.body.campground, function(err, campground) {
+        if (err) {
+          req.flash('error', err.message);
+          return res.redirect('back');
         }
+        res.redirect('/campgrounds/' + campground.id);
+      });
     });
 });
 
@@ -82,30 +110,53 @@ router.get("/:id/edit", middleware.checkCampgroundOwnership, function(req, res){
 	});
 });
 
-//Update Campground Route
-router.put("/:id", middleware.checkCampgroundOwnership, function(req, res){
-	Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground){
-		if (err){
-			res.redirect("/campgrounds");
-		} else{
+router.put("/:id", middleware.checkCampgroundOwnership, upload.single('image'), function(req, res){
+    Campground.findById(req.params.id, async function(err, campground){
+        if(err){
+            req.flash("error", err.message);
+            res.redirect("back");
+        } else {
+            if (req.file) {
+              try {
+                  await cloudinary.v2.uploader.destroy(campground.imageId);
+                  var result = await cloudinary.v2.uploader.upload(req.file.path);
+                  campground.imageId = result.public_id;
+                  campground.image = result.secure_url;
+              } catch(err) {
+                  req.flash("error", err.message);
+                  return res.redirect("back");
+              }
+            }
+			campground.name = req.body.campground.name;
+			campground.description = req.body.campground.description;
+			campground.price = req.body.campground.price;
+			campground.save();
+			req.flash("success", "Successfully updated");
 			res.redirect("/campgrounds/" + req.params.id);
-		}
-	});
+        }
+    });
 });
 
 //Destroy Campground Route and Associated Comments
-router.delete("/:id", middleware.checkCampgroundOwnership, (req, res) => {
-    Campground.findByIdAndRemove(req.params.id, (err, campgroundRemoved) => {
-        if (err) {
-            console.log(err);
-        }
-        Comment.deleteMany( {_id: { $in: campgroundRemoved.comments } }, (err) => {
-            if (err) {
-                console.log(err);
-            }
-            res.redirect("/campgrounds");
-        });
-    });
+router.delete('/:id', function(req, res) {
+	Campground.findById(req.params.id, async function(err, campground) {
+		if(err) {
+			req.flash("error", err.message);
+			return res.redirect("back");
+			}
+			try {
+				await cloudinary.v2.uploader.destroy(campground.imageId);
+				Comment.deleteMany( {_id: { $in: campground.comments } });
+				campground.remove();
+				req.flash('success', 'Campground deleted successfully!');
+				res.redirect('/campgrounds');
+			} catch(err) {
+			if(err) {
+			  req.flash("error", err.message);
+			  return res.redirect("back");
+			}
+		}
+	});
 });
 
 function escapeRegex(text) {
