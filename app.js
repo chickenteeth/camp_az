@@ -12,7 +12,13 @@ var express = require("express"),
     seedDB = require("./seeds"),
     methodOverride = require("method-override");
 
-//requring routes
+// review routes
+var commentRoutes = require("./routes/comments"),
+    reviewRoutes = require("./routes/reviews"),
+    campgroundRoutes = require("./routes/campgrounds"),
+    indexRoutes = require("./routes/index")
+
+// requring routes
 var commentRoutes = require("./routes/comments"),
     campgroundRoutes = require("./routes/campgrounds"),
     indexRoutes = require("./routes/index");
@@ -52,13 +58,15 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use("/", indexRoutes);
-app.use("/campgrounds", campgroundRoutes);
-app.use("/campgrounds/:id/comments", commentRoutes);
 
 app.get("/", function (req, res) {
     res.render("landing");
 });
+
+app.use("/", indexRoutes);
+app.use("/campgrounds", campgroundRoutes);
+app.use("/campgrounds/:id/comments", commentRoutes);
+app.use("/campgrounds/:id/reviews", reviewRoutes);
 
 app.listen(process.env.PORT, process.env.IP);
 

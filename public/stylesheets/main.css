@@ -5,7 +5,6 @@ html {
 body {
   /* Margin bottom by footer height */
 	margin-bottom: 60px;
-	background: #522f70;
 }
 .footer {
 	position: absolute;
@@ -74,11 +73,11 @@ body {
 	padding-top: 20px;
 }
 
-.card {
+.card-effects {
 	transition: ease-in, .5s;
 }
 
-.card:hover {
-	box-shadow: 20px 20px 20px blue;
-	transform: rotate(360deg);
+.card-effects:hover {
+	box-shadow: 0px 10px 8px black;
+	transform:translateY(-7px);
 }
