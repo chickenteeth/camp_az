@@ -16,7 +16,7 @@ var express = require("express"),
 var commentRoutes = require("./routes/comments"),
     reviewRoutes = require("./routes/reviews"),
     campgroundRoutes = require("./routes/campgrounds"),
-    indexRoutes = require("./routes/index")
+    indexRoutes = require("./routes/index");
 
 // requring routes
 var commentRoutes = require("./routes/comments"),
